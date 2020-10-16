@@ -121,9 +121,9 @@ def evaluate(args, model, tokenizer, prefix=""):
                     new_dataset += [copy.deepcopy(sample)]
 
     # if u want to extract pretrained model embedding use name: pretrained-example-data.p  and comment line 126
-    pickle.dump(new_dataset,open("xnli-pretrained-example-data.p","wb"))
+    #pickle.dump(new_dataset,open("xnli-pretrained-example-data.p","wb"))
     # if u want to extract pretrained model embedding use name: finetune-example-data.p and comment line 124
-    # pickle.dump(new_dataset,open("xnli-finetune-example-data.p","wb"))
+    pickle.dump(new_dataset,open("xnli-finetune-example-data.p","wb"))
 
     return 
 
@@ -257,7 +257,7 @@ def main():
     parser.add_argument('--server_port', type=str, default='', help="For distant debugging.")
     args = parser.parse_args()
 
-    if os.path.exists(args.output_dir) and os.listdir(args.output_dir) and args.do_train and not args.overwrite_output_dir:
+    if os.path.exists(args.output_dir) and os.listdir(args.output_dir):
         raise ValueError("Output directory ({}) already exists and is not empty. Use --overwrite_output_dir to overcome.".format(args.output_dir))
 
     # Setup distant debugging if needed

@@ -89,7 +89,7 @@ class XnliProcessor(DataProcessor):
 
     def get_examples(self, data_dir):
         """See base class."""
-        lines = self._read_tsv(os.path.join(data_dir, "anaylze_dataset/xnli.examples.tsv"))
+        lines = self._read_tsv(os.path.join(data_dir, "xnli.examples.tsv")) ##corrected 
         examples = []
         for (i, line) in enumerate(lines):
             if i == 0:

@@ -33,6 +33,7 @@ def preprocessing_intra_sentence(data,layer_index):
         sentence_embeddings = []
         count = 0
         for word_index in range(x["input_ids"].shape[0]):
+            #print(word_index)
             word = x["input_ids"][word_index]
             if word == 101 or word == 0 or word == 102:
                 continue
@@ -42,7 +43,7 @@ def preprocessing_intra_sentence(data,layer_index):
         sentence_embedding = np.mean(sentence_embeddings,axis=0)
         for word_index in range(x["input_ids"].shape[0]):
             word = x["input_ids"][word_index]
-            
+            #print(word_index)
             #skip [PAD], [SEP], [CLS]
             if word == 101 or word == 0 or word == 102:
                 continue
@@ -102,15 +103,25 @@ def Anisotropy(data,layer_index,version):
         mean = MEV_Anisotropy(x_layer)
         
     return mean 
+'''my cosine similarity function'''
+# input two np 1D array
+def myCosSim(vec1, vec2):
+    vec1 = np.array(vec1)
+    vec2 = np.array(vec2)
+    dist=float(np.dot(vec1,vec2)/(np.linalg.norm(vec1)*np.linalg.norm(vec2)))
+    return dist
 
 # Question 2
 def cosine_similarity_Anisotropy(two_words):
-    
-    cos = None
+
+
+    #cos = cosine_similarity(first, second)
+    dist = myCosSim(two_words[0][1], two_words[1][1])
+    #print(dist)
     """
     Todo: return two word cosine similarity
     """
-    return cos
+    return dist
 
 # Question 3 -main - IntraSentenceSimilarity
 def IntraSentenceSimilarity_function():
@@ -139,18 +150,38 @@ def IntraSentenceSimilarity_function():
     return 
 # Question 3 - IntraSentenceSimilarity
 def IntraSentenceSimilarity(data,layer_index):
-    
     x_layer = preprocessing_intra_sentence(data,layer_index)
-
     average_cos = []
+    acc_word_cos = []
+    prev_count = x_layer[0][3]
+    #print(prev_count)
     for x in x_layer:
         """
         Todo: calculate intra-sentence cosine similarity
+        x_layer: [(word, embedding, sentence_embedding,count), (), ....]
+        x: (word, embedding, sentence_embedding,count)
         """
-        cos = 0
-        average_cos += [ np.mean(cos)/x[3] ]
-    mean = sum(average_cos) / len(data)
-    return mean 
+        embed = x[1]
+        sentence_embed = x[2]
+        count = x[3]
+        cos = myCosSim(embed, sentence_embed)
+        
+        if prev_count != count: ## start a new sentence
+            intrasim = np.mean(np.array(acc_word_cos))
+            #print(intrasim)
+            acc_word_cos = []
+            average_cos += [intrasim]
+            #print(average_cos)
+            prev_count = count
+        
+        acc_word_cos += [cos]
+        #print(count)
+    
+
+        #average_cos += [ np.mean(cos)/x[3]
+    #mean = sum(average_cos) / len(data)
+
+    return np.mean(np.array(average_cos))
 
 # Question 3 - main SelfSimilarity
 def SelfSimilarity_function():
@@ -190,8 +221,12 @@ def calculate_self_similarity(function,layer_index):
     for key in tqdm(data.keys()):
         same_word_embeddings=data[key]
         average_cos = []
-        mean=0
-
+        mean = []
+        for i in range(0, len(same_word_embeddings)):
+            for j in range(i+1, len(same_word_embeddings)):
+                mean.append(myCosSim(same_word_embeddings[i], same_word_embeddings[j]))
+        total_average_cos += [np.mean(mean)]
+        #print(mean)
         """
         
         Todo:
@@ -199,9 +234,8 @@ def calculate_self_similarity(function,layer_index):
         Hint: You can write new function to do this or sklearn cosine similarity
         
         """
-        
-        total_average_cos += [np.mean(mean)]
     return np.mean(np.array(total_average_cos))
+    #np.mean(np.array(total_average_cos))
 
 # Question 3
 def self_similarity(data,layer_index,function):
@@ -377,25 +411,25 @@ def AnisotropyAdjustedMEV_function():
 if __name__ == "__main__":
     
     #Question 2
-    Anisotropy_function(version="self-sim")
-    Anisotropy_function(version="intra-sentence-sim")
+    #Anisotropy_function(version="self-sim")
+    #Anisotropy_function(version="intra-sentence-sim")
     
     #Question 3
-    SelfSimilarity_function()
+    #SelfSimilarity_function()
     IntraSentenceSimilarity_function()
 
     #Question 4
     AnisotropyAdjustedIntraSentenceSimilarity_function()
-    AnisotropyAdjustedSelfSimilarity_function()
+    #AnisotropyAdjustedSelfSimilarity_function()
 
     #Bonus
-    Anisotropy_function(version="MEV")
+    #Anisotropy_function(version="MEV")
 
     #Bonus
-    MaximumExplainableVariance_function()
+    #MaximumExplainableVariance_function()
 
     #Bonus
-    AnisotropyAdjustedMEV_function()
+    #AnisotropyAdjustedMEV_function()
 
 
-    
+
